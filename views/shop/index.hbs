@@ -1,3 +1,11 @@
+<div class="row">
+  <div class="col-sm-6 col-md-4 col-md-offset-4 col-sm-offset-3">
+    <div id="success" class="alert alert-success" {{#if noMessage}}hidden{{/if}}>
+      {{successMsg}}
+    </div>
+  </div>
+</div>
+
 {{# each product}}
 <div class="row">
   {{# each this}}
@@ -13,8 +21,8 @@
           Enim culpa, distinctio asperiores ipsa eum tenetur
           aperiam delectus quos! Commodi.</p>
         <div class="clearfix">
-          <div class="price pull-left">$12</div>
-          <a href="#" class="btn btn-success pull-right" role="button">Button</a>
+          <div class="price pull-left">${{this.price}}</div>
+          <a href="/add-to-cart/{{this._id}}" class="btn btn-success pull-right" role="button">Add to cart</a>
         </div>
       </div>
     </div>
@@ -23,7 +31,7 @@
 </div>
 {{/each}}
 
-<div class="row">
+{{!-- <div class="row">
   <div class="col-sm-6 col-md-4">
     <div class="thumbnail">
       <img src="https://images-na.ssl-images-amazon.com/images/I/61Iz2yy2CKL.jpg" alt="..." class="img-responsive">
@@ -136,4 +144,4 @@
     </div>
   </div>
 </div>
-</div>
+</div> --}}

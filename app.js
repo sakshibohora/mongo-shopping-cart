@@ -10,10 +10,13 @@ import session from 'express-session';
 import passport from 'passport';
 import flash from 'connect-flash';
 import validator from 'express-validator';
+const MongoStore = require('connect-mongo')(session);;
 
 import indexRouter from './routes/index';
 import userRoutes from './routes/user';
 const app = express();
+
+const Handlebars = require('handlebars')
 const { allowInsecurePrototypeAccess } = require('@handlebars/allow-prototype-access')
 
 mongoose.connect('mongodb://localhost:27017/shoppingCart', { useNewUrlParser: true });
@@ -25,37 +28,6 @@ db.once('open', function () {
 });
 
 require('./config/passport');
-// const Schema = mongoose.Schema;
-
-// const schema = new Schema({
-//     imagePath: {type: String, required:true},
-//     title: {type: String, required:true},
-//     description: {type: String, required:true},
-//     price: {type: Number, required:true},
-// })
-
-// const Product = mongoose.model('Products',schema);
-// const products = 
-// new Product({
-//   imagePath: "https://images-na.ssl-images-amazon.com/images/I/6y2CKL.jpg",
-//   title: "Robin sharma book",
-//   description: "Awesome book!",
-//   price: 20
-// })
-
-// try {
-//   console.log("hiiii");
-//       products.save()
-//         .then(doc => {
-//           console.log("doc>>",doc)
-//         })
-//         .catch(err => {
-//           console.error("err>>>",err)
-//         })
-//     } catch (error) {
-//       console.log(" error", error)
-
-//     }
 
 // view engine setup
 // app.engine('.hbs', expressHbs({
@@ -64,22 +36,34 @@ require('./config/passport');
 //   handlebars: allowInsecurePrototypeAccess(expressHbs)
 // }));
 app.set('view engine', '.hbs');
-app.engine('.hbs', expressHbs({ defaultLayout: 'layout', extname: '.hbs' }));
+app.engine('.hbs', expressHbs({ defaultLayout: 'layout', extname: '.hbs',handlebars: allowInsecurePrototypeAccess(Handlebars) }));
 app.set('view engine', '.hbs');
+// const hbs = expressHbs.create({
+//   defaultLayout: 'layout',
+//   extname: '.hbs',
+//   handlebars: allowInsecurePrototypeAccess(Handlebars)
+// });
 
 app.use(logger('dev'));
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 app.use(validator());
 app.use(cookieParser());
-app.use(session({ secret: 'mysecretkey', resave: false, saveUninitialized: false }))
+app.use(session({
+  secret: 'mysecretkey',
+  resave: false,
+  saveUninitialized: false,
+  store: new MongoStore({ mongooseConnection: mongoose.connection }),
+  cookie: { maxAge: 180 * 60 * 1000 }
+}))
 app.use(flash());
 app.use(passport.initialize())
 app.use(passport.session());
 app.use(express.static(path.join(__dirname, 'public')));
 
-app.use((req,res,next)=>{
+app.use((req, res, next) => {
   res.locals.login = req.isAuthenticated();
+  res.locals.session = req.session;
   next();
 })
 app.use('/user', userRoutes);
